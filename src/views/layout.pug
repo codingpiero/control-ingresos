@@ -1,0 +1,133 @@
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title= typeof title !== 'undefined' ? title + ' | Control de Acceso' : 'Control de Acceso'
+    link(rel="stylesheet" href="/css/tailwind.css")
+
+  body(class="min-h-screen bg-slate-50 text-slate-800 antialiased")
+    .min-h-screen(class="md:flex")
+
+      //- MENÚ LATERAL
+      aside(class="border-r border-violet-100 bg-white md:min-h-screen md:w-64 md:shrink-0")
+        .flex.items-center.gap-3.border-b.border-violet-100.p-6
+          .flex.h-11.w-11.items-center.justify-center.rounded-xl.bg-primary-light.text-primary-dark
+            svg(
+              xmlns="http://www.w3.org/2000/svg"
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            )
+              path(d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z")
+              path(d="m9 12 2 2 4-4")
+          div
+            p(class="font-bold text-slate-900") Control de Acceso
+            p(class="mt-1 text-xs text-slate-500") Seguridad residencial
+
+        //- NAVEGACIÓN
+        nav(class="space-y-2 p-4")
+          p(class="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400") Menú principal
+
+          - const pathActual = currentPath || '/'
+          - const inicioActivo = pathActual === '/'
+          - const registroActivo = pathActual === '/entries/nuevo'
+          - const listaActiva = pathActual === '/entries' || (pathActual.startsWith('/entries/') && !registroActivo)
+          - const claseActiva = 'flex items-center gap-3 rounded-xl bg-primary-light px-4 py-3 font-semibold text-primary-dark transition hover:bg-violet-200'
+          - const claseNormal = 'flex items-center gap-3 rounded-xl px-4 py-3 font-medium text-slate-600 transition hover:bg-primary-light hover:text-primary-dark'
+
+          //- Inicio
+          a(
+            href="/"
+            class=(inicioActivo ? claseActiva : claseNormal)
+            aria-current=(inicioActivo ? 'page' : false)
+          )
+            svg(
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            )
+              rect(x="3" y="3" width="7" height="9" rx="1")
+              rect(x="14" y="3" width="7" height="5" rx="1")
+              rect(x="14" y="12" width="7" height="9" rx="1")
+              rect(x="3" y="16" width="7" height="5" rx="1")
+            span Inicio
+
+          //- Lista de ingresos
+          a(
+            href="/entries"
+            class=(listaActiva ? claseActiva : claseNormal)
+            aria-current=(listaActiva ? 'page' : false)
+          )
+            svg(
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            )
+              path(d="M8 6h13")
+              path(d="M8 12h13")
+              path(d="M8 18h13")
+              path(d="M3 6h.01")
+              path(d="M3 12h.01")
+              path(d="M3 18h.01")
+            span Lista de ingresos
+
+          //- Registrar ingreso
+          a(
+            href="/entries/nuevo"
+            class=(registroActivo ? claseActiva : claseNormal)
+            aria-current=(registroActivo ? 'page' : false)
+          )
+            svg(
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            )
+              circle(cx="12" cy="12" r="10")
+              path(d="M12 8v8")
+              path(d="M8 12h8")
+            span Registrar ingreso
+
+      //- CONTENIDO PRINCIPAL
+      .min-w-0.flex-1
+        header(class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 bg-white px-5 py-4 md:px-8")
+          div
+            p(class="text-sm text-slate-500") Sistema de seguridad
+            h1(class="mt-1 text-xl font-bold text-slate-900")
+              = typeof title !== 'undefined' ? title : 'Panel principal'
+
+          .flex.items-center.gap-3
+            .flex.h-10.w-10.items-center.justify-center.rounded-full.bg-primary-light.font-bold.text-primary-dark
+              | S
+            div
+              p(class="text-sm font-semibold text-slate-800") Personal de seguridad
+              p(class="mt-1 text-xs text-slate-500") Control de ingresos
+
+        main(class="p-5 md:p-8")
+          block content
+
+        footer(class="border-t border-slate-200 bg-white px-5 py-4 text-center text-xs text-slate-400 md:px-8")
+          | Sistema de Control de Acceso · Condominio

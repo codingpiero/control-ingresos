@@ -1,0 +1,233 @@
+extends ../layout
+
+block content
+    div(class="mx-auto max-w-5xl space-y-6")
+
+        // Encabezado
+        div(class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between")
+            div
+                h2(class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl") Registrar visita
+                p(class="mt-2 text-sm text-gray-500") Registra el ingreso de peatones y vehículos al condominio.
+
+            a(
+                href="/entries"
+                class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-primary hover:bg-violet-50 hover:text-primary"
+            ) ← Volver a la lista
+
+        // Error
+        if error
+            div(class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700")
+                p= error
+
+        // Formulario
+        form(
+            method="POST"
+            action="/entries"
+            class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
+        )
+
+            // Datos del ingreso
+            fieldset(class="border-b border-gray-100 p-5 sm:p-7")
+                legend(class="sr-only") Datos del ingreso
+
+                div(class="mb-6")
+                    h3(class="text-lg font-bold text-gray-900") Datos del ingreso
+                    p(class="mt-1 text-sm text-gray-500") Información principal del registro.
+
+                div(class="grid grid-cols-1 gap-5 md:grid-cols-2")
+                    div(class="space-y-2")
+                        label(
+                            for="medio_ingreso"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Medio de ingreso
+
+                        select#medio_ingreso(
+                            name="medio_ingreso"
+                            required
+                            class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+                            option(value="") Selecciona una opción
+                            option(value="PEATON" selected=(data.medio_ingreso === 'PEATON')) Peatón
+                            option(value="VEHICULO" selected=(data.medio_ingreso === 'VEHICULO')) Vehículo
+
+                    div(class="space-y-2")
+                        label(
+                            for="identificacion_estado"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Estado de identificación
+
+                        select#identificacion_estado(
+                            name="identificacion_estado"
+                            required
+                            class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+                            option(value="IDENTIFICADO" selected=(data.identificacion_estado !== 'NO_IDENTIFICADO')) Identificado
+                            option(value="NO_IDENTIFICADO" selected=(data.identificacion_estado === 'NO_IDENTIFICADO')) No identificado
+
+                    div(class="space-y-2 md:col-span-2")
+                        label(
+                            for="motivo_ingreso"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Motivo de ingreso
+
+                        input#motivo_ingreso(
+                            type="text"
+                            name="motivo_ingreso"
+                            maxlength="255"
+                            value=(data.motivo_ingreso || '')
+                            autofocus
+                            placeholder="Ej. Visita familiar, entrega de pedido..."
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+
+            // Datos personales
+            fieldset(class="border-b border-gray-100 p-5 sm:p-7")
+                legend(class="sr-only") Datos personales
+
+                div(class="mb-6")
+                    h3(class="text-lg font-bold text-gray-900") Datos personales
+                    p(class="mt-1 text-sm text-gray-500") Información de identificación de la persona.
+
+                div(class="grid grid-cols-1 gap-5 md:grid-cols-2")
+                    div(class="space-y-2")
+                        label(
+                            for="nombres_visita"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Nombres
+
+                        input#nombres_visita(
+                            type="text"
+                            name="nombres_visita"
+                            maxlength="100"
+                            value=(data.nombres_visita || '')
+                            placeholder="Ingresa los nombres"
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+
+                    div(class="space-y-2")
+                        label(
+                            for="apellidos_visita"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Apellidos
+
+                        input#apellidos_visita(
+                            type="text"
+                            name="apellidos_visita"
+                            maxlength="100"
+                            value=(data.apellidos_visita || '')
+                            placeholder="Ingresa los apellidos"
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+
+                    div(class="space-y-2")
+                        label(
+                            for="document_type_id"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Tipo de documento
+
+                        select#document_type_id(
+                            name="document_type_id"
+                            class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+                            option(value="") Selecciona un documento
+                            option(value="1" selected=(String(data.document_type_id || '') === '1')) DNI
+                            option(value="2" selected=(String(data.document_type_id || '') === '2')) Carné de Extranjería
+                            option(value="3" selected=(String(data.document_type_id || '') === '3')) Pasaporte
+                            option(value="4" selected=(String(data.document_type_id || '') === '4')) Otros
+
+                    div(class="space-y-2")
+                        label(
+                            for="numero_documento"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Número de documento
+
+                        input#numero_documento(
+                            type="text"
+                            name="numero_documento"
+                            maxlength="30"
+                            value=(data.numero_documento || '')
+                            placeholder="Ingresa el número"
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+
+                    div(class="space-y-2 md:col-span-2")
+                        label(
+                            for="direccion_visita"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Dirección
+
+                        input#direccion_visita(
+                            type="text"
+                            name="direccion_visita"
+                            maxlength="200"
+                            value=(data.direccion_visita || '')
+                            placeholder="Ingresa la dirección"
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+
+            // Datos del vehículo
+            fieldset(class="p-5 sm:p-7")
+                legend(class="sr-only") Datos del vehículo
+
+                div(class="mb-6")
+                    h3(class="text-lg font-bold text-gray-900") Datos del vehículo
+                    p(class="mt-1 text-sm text-gray-500") Información del vehículo, cuando corresponda.
+
+                div(class="grid grid-cols-1 gap-5 md:grid-cols-2")
+                    div(class="space-y-2")
+                        label(
+                            for="placa_vehiculo"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Placa
+
+                        input#placa_vehiculo(
+                            type="text"
+                            name="placa_vehiculo"
+                            maxlength="20"
+                            value=(data.placa_vehiculo || '')
+                            placeholder="Ej. ABC-123"
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+
+                    div(class="space-y-2")
+                        label(
+                            for="color_vehiculo"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Color del vehículo
+
+                        input#color_vehiculo(
+                            type="text"
+                            name="color_vehiculo"
+                            maxlength="50"
+                            value=(data.color_vehiculo || '')
+                            placeholder="Ej. Negro, blanco, rojo..."
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+
+                    div(class="space-y-2")
+                        label(
+                            for="cantidad_pasajeros"
+                            class="block text-sm font-semibold text-gray-700"
+                        ) Cantidad de pasajeros
+
+                        input#cantidad_pasajeros(
+                            type="number"
+                            name="cantidad_pasajeros"
+                            min="0"
+                            step="1"
+                            value=(data.cantidad_pasajeros == null ? '' : data.cantidad_pasajeros)
+                            placeholder="Ej. 3"
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
+                        )
+
+            // Botones
+            div(class="flex flex-col-reverse gap-3 border-t border-gray-100 bg-gray-50 px-5 py-5 sm:flex-row sm:justify-end sm:px-7")
+                a(
+                    href="/entries"
+                    class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
+                ) Cancelar
+
+                button(
+                    type="submit"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-4 focus:ring-violet-200"
+                ) Registrar visita

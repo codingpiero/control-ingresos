@@ -1,0 +1,21 @@
+const dotenv = require('dotenv');
+
+const enviroment = process.env.NODE_ENV ?? 'development';
+
+dotenv.config({
+    path:`.env.${enviroment}.local`
+});
+
+const config = {
+    APP:{
+        PORT:process.env.PORT ?? 3000,
+    },
+    DATABASE:{
+        POSTGRESQL:process.env.POSTGRES_URI
+    },
+    SESSION:{
+        SECRET:process.env.SESSION_SECRET
+    }
+}
+
+module.exports = config;

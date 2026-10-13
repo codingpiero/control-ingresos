@@ -1,0 +1,173 @@
+
+extends ../layout
+
+block content
+    //- Encabezado
+    .mb-8.flex.flex-col.justify-between.gap-4(class="sm:flex-row sm:items-center")
+        div
+            h2(class="text-2xl font-bold tracking-tight text-slate-900")
+                | Registro de visitas
+            p(class="mt-2 text-sm text-slate-500")
+                | Administra y consulta los ingresos del condominio.
+
+        a(
+            href="/entries/nuevo"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark active:scale-95"
+        )
+            span(class="text-xl") +
+            | Registrar ingreso
+
+    //- Contenedor principal
+    .overflow-hidden.rounded-2xl.border.border-slate-200.bg-white.shadow-sm
+
+        //- Cabecera de tabla
+        .flex.flex-wrap.items-center.justify-between.gap-3.border-b.border-slate-200.p-5
+            div
+                h3(class="text-base font-bold text-slate-900")
+                    | Historial de ingresos
+                p(class="mt-1 text-sm text-slate-500")
+                    | Registros de visitas al condominio.
+
+            span(class="rounded-full bg-primary-light px-3 py-1 text-xs font-semibold text-primary-dark")
+                = `${entries.length} registros`
+
+        //- Tabla
+        .overflow-x-auto
+            table(class="w-full min-w-[1250px] text-left text-sm")
+
+                thead(class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500")
+                    tr
+                        th(class="px-5 py-4 font-semibold") Código
+                        th(class="px-5 py-4 font-semibold") Fecha ingreso
+                        th(class="px-5 py-4 font-semibold") Fecha salida
+                        th(class="px-5 py-4 font-semibold") Visita
+                        th(class="px-5 py-4 font-semibold") Documento
+                        th(class="px-5 py-4 font-semibold") Medio ingreso
+                        th(class="px-5 py-4 font-semibold") Placa
+                        th(class="px-5 py-4 font-semibold") Identificación
+                        th(class="px-5 py-4 font-semibold") Estado
+                        th(class="px-5 py-4 font-semibold") Registrado por
+                        th(class="px-5 py-4 font-semibold") Acciones
+
+                tbody(class="divide-y divide-slate-100")
+
+                    if entries.length
+                        each entry in entries
+                            tr(class="transition hover:bg-violet-50/50")
+
+                                //- Código
+                                td(class="whitespace-nowrap px-5 py-4 font-semibold text-slate-700")
+                                    = entry.id
+
+                                //- Fecha de ingreso
+                                td(class="whitespace-nowrap px-5 py-4 text-slate-600")
+                                    = entry.fecha_hora_ingreso
+
+                                //- Fecha de salida
+                                td(class="whitespace-nowrap px-5 py-4 text-slate-600")
+                                    = entry.fecha_hora_salida || 'Pendiente'
+
+                                //- Visitante
+                                td(class="px-5 py-4")
+                                    p(class="font-semibold text-slate-800")
+                                        = `${entry.nombres_visita || 'No identificado'} ${entry.apellidos_visita || ''}`
+
+                                //- Documento
+                                td(class="whitespace-nowrap px-5 py-4 text-slate-600")
+                                    = entry.numero_documento || '-'
+
+                                //- Medio de ingreso
+                                td(class="whitespace-nowrap px-5 py-4")
+                                    span(class="inline-flex rounded-lg bg-primary-light px-3 py-1 text-xs font-semibold capitalize text-primary-dark")
+                                        = entry.medio_ingreso
+
+                                //- Placa
+                                td(class="whitespace-nowrap px-5 py-4 font-medium text-slate-700")
+                                    = entry.placa_vehiculo || '-'
+
+                                //- Identificación
+                                td(class="whitespace-nowrap px-5 py-4 text-slate-600")
+                                    = entry.identificacion_estado
+
+                                //- Estado
+                                td(class="whitespace-nowrap px-5 py-4")
+                                    if entry.fecha_hora_salida == null
+                                        span(class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700")
+                                            span(class="h-2 w-2 rounded-full bg-emerald-500")
+                                            | Dentro
+                                    else
+                                        span(class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600")
+                                            span(class="h-2 w-2 rounded-full bg-slate-400")
+                                            | Salida registrada
+
+                                //- Usuario que registró
+                                td(class="whitespace-nowrap px-5 py-4 text-slate-600")
+                                    = entry.username || '-'
+
+                                //- Acciones
+                                td(class="px-5 py-4")
+                                    .flex.items-center.gap-2
+
+                                        if currentUser.rol === 'VIGILANTE'
+
+                                            //- Botón editar
+                                            a(
+                                                href=`/entries/${entry.id}/editar`
+                                                class="inline-flex items-center justify-center rounded-lg bg-violet-100 px-3 py-2 text-xs font-bold text-violet-800 shadow-sm transition hover:bg-violet-200 active:scale-95"
+                                            )
+                                                | Editar
+
+                                            //- Botón registrar salida
+                                            if entry.fecha_hora_salida == null
+                                                form(
+                                                    method="POST"
+                                                    action=`/entries/${entry.id}/salida`
+                                                    onsubmit="return confirm('¿Confirmas la salida de esta visita?')"
+                                                )
+                                                    button(
+                                                        type="submit"
+                                                        class="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700 active:scale-95"
+                                                    )
+                                                        | Registrar salida
+
+                                            //- Botón eliminar
+                                            form(
+                                                method="POST"
+                                                action=`/entries/${entry.id}/eliminar`
+                                                onsubmit="return confirm('¿Estás seguro de eliminar esta visita?')"
+                                            )
+                                                button(
+                                                    type="submit"
+                                                    class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 active:scale-95"
+                                                )
+                                                    | Eliminar
+
+                                        else
+                                            span(class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500")
+                                                | Solo consulta
+
+                    else
+                        //- Estado sin registros
+                        tr
+                            td(
+                                colspan="11"
+                                class="px-5 py-16 text-center"
+                            )
+                                div(class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary-dark")
+                                    svg(
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="28"
+                                        height="28"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.7"
+                                    )
+                                        path(d="M8 6h13M8 12h13M8 18h13")
+                                        path(d="M3 6h.01M3 12h.01M3 18h.01")
+
+                                h3(class="mt-4 text-base font-semibold text-slate-800")
+                                    | No hay registros todavía
+
+                                p(class="mt-2 text-sm text-slate-500")
+                                    | Los ingresos registrados aparecerán aquí.

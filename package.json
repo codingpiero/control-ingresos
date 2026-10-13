@@ -4,15 +4,26 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "start:dev": "cross-env NODE_ENV=development nodemon src/server.js",
+    "tailwind:dev": "npx @tailwindcss/cli -i ./src/input.css -o ./public/css/tailwind.css --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "bcrypt": "^6.0.0",
+    "connect-pg-simple": "^10.0.0",
+    "cross-env": "^10.1.0",
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "pg": "^8.23.1",
-    "pug": "^3.0.4"
+    "pug": "^3.0.4",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }

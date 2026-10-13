@@ -1,0 +1,76 @@
+
+extends ../layout
+
+block content
+    h2 Editar visita
+
+    p
+        a(href="/entries") Volver a la lista
+
+    form(method="POST", action=`/entries/${data.id}/editar`)
+        fieldset
+            legend Datos del ingreso
+
+            div
+                label(for="medio_ingreso") Medio de ingreso:
+                select#medio_ingreso(name="medio_ingreso" required)
+                    option(value="PEATON" selected=data.medio_ingreso === 'PEATON') Peatón
+                    option(value="VEHICULO" selected=data.medio_ingreso === 'VEHICULO') Vehículo
+
+            div
+                label(for="identificacion_estado") Estado de identificación:
+                select#identificacion_estado(name="identificacion_estado" required)
+                    option(value="IDENTIFICADO" selected=data.identificacion_estado === 'IDENTIFICADO') Identificado
+                    option(value="NO_IDENTIFICADO" selected=data.identificacion_estado === 'NO_IDENTIFICADO') No identificado
+
+            div
+                label(for="motivo_ingreso") Motivo de ingreso:
+                input#motivo_ingreso(type="text" name="motivo_ingreso" maxlength="255" value=data.motivo_ingreso || '')
+
+        fieldset
+            legend Datos personales
+
+            div
+                label(for="nombres_visita") Nombres:
+                input#nombres_visita(type="text" name="nombres_visita" maxlength="100" value=data.nombres_visita || '')
+
+            div
+                label(for="apellidos_visita") Apellidos:
+                input#apellidos_visita(type="text" name="apellidos_visita" maxlength="100" value=data.apellidos_visita || '')
+
+            div
+                label(for="document_type_id") Tipo de documento:
+                select#document_type_id(name="document_type_id")
+                    option(value="") Selecciona un documento
+                    option(value="1" selected=String(data.document_type_id || '') === '1') DNI
+                    option(value="2" selected=String(data.document_type_id || '') === '2') Carné de Extranjería
+                    option(value="3" selected=String(data.document_type_id || '') === '3') Pasaporte
+                    option(value="4" selected=String(data.document_type_id || '') === '4') Otro
+
+            div
+                label(for="numero_documento") Número de documento:
+                input#numero_documento(type="text" name="numero_documento" maxlength="30" value=data.numero_documento || '')
+
+            div
+                label(for="direccion_visita") Dirección:
+                input#direccion_visita(type="text" name="direccion_visita" maxlength="200" value=data.direccion_visita || '')
+
+        fieldset
+            legend Datos del vehículo
+
+            div
+                label(for="placa_vehiculo") Placa:
+                input#placa_vehiculo(type="text" name="placa_vehiculo" maxlength="20" value=data.placa_vehiculo || '')
+
+            div
+                label(for="color_vehiculo") Color:
+                input#color_vehiculo(type="text" name="color_vehiculo" maxlength="50" value=data.color_vehiculo || '')
+
+            div
+                label(for="cantidad_pasajeros") Cantidad de pasajeros:
+                input#cantidad_pasajeros(type="number" name="cantidad_pasajeros" min="0" step="1" value=(data.cantidad_pasajeros == null ? '' : data.cantidad_pasajeros))
+
+        div
+            button(type="submit") Guardar cambios
+            |  
+            a(href="/entries") Cancelar
