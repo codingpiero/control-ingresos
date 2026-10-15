@@ -2,6 +2,9 @@ const {Pool} =require('pg');
 const config = require('./config');
 
 const pool = new Pool({
-    connectionString: config.DATABASE.POSTGRESQL
+    connectionString: config.DATABASE.POSTGRESQL,
+    ssl:{
+        rejectUnauthorized:false
+    }
 });
 module.exports = pool;
