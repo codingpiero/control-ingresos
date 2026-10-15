@@ -1,10 +1,11 @@
 {
   "name": "control-vehiculos",
   "version": "1.0.0",
-  "description": "",
+  "description": "aplicacion web para registrar el ingreso y salida en un condominioi",
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
+    "start:prod": "cross-env NODE_ENV=production node src/server.js",
     "start:dev": "cross-env NODE_ENV=development nodemon src/server.js",
     "tailwind:dev": "npx @tailwindcss/cli -i ./src/input.css -o ./public/css/tailwind.css --watch"
   },

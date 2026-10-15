@@ -3,7 +3,7 @@ extends ../layout
 block content
     div(class="mx-auto max-w-5xl space-y-6")
 
-        // Encabezado
+        //- ENCABEZADO
         div(class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between")
             div
                 h2(class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl") Registrar visita
@@ -14,19 +14,19 @@ block content
                 class="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-primary hover:bg-violet-50 hover:text-primary"
             ) ← Volver a la lista
 
-        // Error
+        //- MENSAJE DE ERROR
         if error
-            div(class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700")
+            div(class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700" role="alert")
                 p= error
 
-        // Formulario
+        //- FORMULARIO
         form(
             method="POST"
             action="/entries"
             class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
         )
 
-            // Datos del ingreso
+            //- DATOS DEL INGRESO
             fieldset(class="border-b border-gray-100 p-5 sm:p-7")
                 legend(class="sr-only") Datos del ingreso
 
@@ -35,6 +35,8 @@ block content
                     p(class="mt-1 text-sm text-gray-500") Información principal del registro.
 
                 div(class="grid grid-cols-1 gap-5 md:grid-cols-2")
+
+                    //- MEDIO DE INGRESO
                     div(class="space-y-2")
                         label(
                             for="medio_ingreso"
@@ -46,10 +48,11 @@ block content
                             required
                             class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
-                            option(value="") Selecciona una opción
+                            option(value="" selected=(!data.medio_ingreso)) Selecciona una opción
                             option(value="PEATON" selected=(data.medio_ingreso === 'PEATON')) Peatón
                             option(value="VEHICULO" selected=(data.medio_ingreso === 'VEHICULO')) Vehículo
 
+                    //- ESTADO DE IDENTIFICACIÓN
                     div(class="space-y-2")
                         label(
                             for="identificacion_estado"
@@ -64,6 +67,7 @@ block content
                             option(value="IDENTIFICADO" selected=(data.identificacion_estado !== 'NO_IDENTIFICADO')) Identificado
                             option(value="NO_IDENTIFICADO" selected=(data.identificacion_estado === 'NO_IDENTIFICADO')) No identificado
 
+                    //- MOTIVO DE INGRESO
                     div(class="space-y-2 md:col-span-2")
                         label(
                             for="motivo_ingreso"
@@ -80,8 +84,8 @@ block content
                             class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
-            // Datos personales
-            fieldset(class="border-b border-gray-100 p-5 sm:p-7")
+            //- DATOS PERSONALES: PARA PEATÓN Y VEHÍCULO
+            fieldset#datos_personales(class="border-b border-gray-100 p-5 sm:p-7")
                 legend(class="sr-only") Datos personales
 
                 div(class="mb-6")
@@ -89,6 +93,8 @@ block content
                     p(class="mt-1 text-sm text-gray-500") Información de identificación de la persona.
 
                 div(class="grid grid-cols-1 gap-5 md:grid-cols-2")
+
+                    //- NOMBRES
                     div(class="space-y-2")
                         label(
                             for="nombres_visita"
@@ -104,6 +110,7 @@ block content
                             class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
+                    //- APELLIDOS
                     div(class="space-y-2")
                         label(
                             for="apellidos_visita"
@@ -119,6 +126,7 @@ block content
                             class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
+                    //- TIPO DE DOCUMENTO
                     div(class="space-y-2")
                         label(
                             for="document_type_id"
@@ -135,6 +143,7 @@ block content
                             option(value="3" selected=(String(data.document_type_id || '') === '3')) Pasaporte
                             option(value="4" selected=(String(data.document_type_id || '') === '4')) Otros
 
+                    //- NÚMERO DE DOCUMENTO
                     div(class="space-y-2")
                         label(
                             for="numero_documento"
@@ -150,6 +159,7 @@ block content
                             class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
+                    //- DIRECCIÓN
                     div(class="space-y-2 md:col-span-2")
                         label(
                             for="direccion_visita"
@@ -165,15 +175,17 @@ block content
                             class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
-            // Datos del vehículo
-            fieldset(class="p-5 sm:p-7")
+            //- DATOS DEL VEHÍCULO: SOLO SI SELECCIONA VEHÍCULO
+            fieldset#datos_vehiculo(class="border-b border-gray-100 p-5 sm:p-7")
                 legend(class="sr-only") Datos del vehículo
 
                 div(class="mb-6")
                     h3(class="text-lg font-bold text-gray-900") Datos del vehículo
-                    p(class="mt-1 text-sm text-gray-500") Información del vehículo, cuando corresponda.
+                    p(class="mt-1 text-sm text-gray-500") Información del vehículo que ingresa al condominio.
 
                 div(class="grid grid-cols-1 gap-5 md:grid-cols-2")
+
+                    //- PLACA
                     div(class="space-y-2")
                         label(
                             for="placa_vehiculo"
@@ -189,6 +201,7 @@ block content
                             class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
+                    //- COLOR
                     div(class="space-y-2")
                         label(
                             for="color_vehiculo"
@@ -204,6 +217,7 @@ block content
                             class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
+                    //- CANTIDAD DE PASAJEROS
                     div(class="space-y-2")
                         label(
                             for="cantidad_pasajeros"
@@ -220,7 +234,7 @@ block content
                             class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
-            // Botones
+            //- BOTONES
             div(class="flex flex-col-reverse gap-3 border-t border-gray-100 bg-gray-50 px-5 py-5 sm:flex-row sm:justify-end sm:px-7")
                 a(
                     href="/entries"
@@ -231,3 +245,28 @@ block content
                     type="submit"
                     class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-4 focus:ring-violet-200"
                 ) Registrar visita
+
+    //- JAVASCRIPT PARA MOSTRAR U OCULTAR DATOS DEL VEHÍCULO
+    script.
+        document.addEventListener('DOMContentLoaded', () => {
+            const medioIngreso = document.getElementById('medio_ingreso');
+            const datosVehiculo = document.getElementById('datos_vehiculo');
+
+            if (!medioIngreso || !datosVehiculo) return;
+
+            const camposVehiculo = datosVehiculo.querySelectorAll('input, select, textarea, button');
+
+            function actualizarFormulario() {
+                const esVehiculo = medioIngreso.value === 'VEHICULO';
+
+                datosVehiculo.hidden = !esVehiculo;
+
+                camposVehiculo.forEach(campo => {
+                    campo.disabled = !esVehiculo;
+                });
+            }
+
+            medioIngreso.addEventListener('change', actualizarFormulario);
+
+            actualizarFormulario();
+        });

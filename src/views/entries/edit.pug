@@ -2,75 +2,214 @@
 extends ../layout
 
 block content
-    h2 Editar visita
+    div(class="mx-auto max-w-5xl space-y-6")
 
-    p
-        a(href="/entries") Volver a la lista
-
-    form(method="POST", action=`/entries/${data.id}/editar`)
-        fieldset
-            legend Datos del ingreso
-
+        //- Encabezado
+        div(class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between")
             div
-                label(for="medio_ingreso") Medio de ingreso:
-                select#medio_ingreso(name="medio_ingreso" required)
-                    option(value="PEATON" selected=data.medio_ingreso === 'PEATON') Peatón
-                    option(value="VEHICULO" selected=data.medio_ingreso === 'VEHICULO') Vehículo
+                div(class="mb-2 flex items-center gap-2 text-sm text-slate-500")
+                    a(href="/entries", class="transition hover:text-primary") Lista de visitas
+                    span /
+                    span(class="font-medium text-primary") Editar
 
+                h2(class="text-3xl font-bold tracking-tight text-slate-900") Editar visita
+
+                p(class="mt-2 text-sm leading-6 text-slate-500")
+                    | Actualiza los datos del ingreso y de la persona o vehículo registrado.
+
+            a(
+                href="/entries"
+                class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-primary hover:text-primary"
+            )
+                span(class="text-lg") ←
+                | Volver a la lista
+
+        //- Información del registro
+        div(class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary-light px-5 py-4")
             div
-                label(for="identificacion_estado") Estado de identificación:
-                select#identificacion_estado(name="identificacion_estado" required)
-                    option(value="IDENTIFICADO" selected=data.identificacion_estado === 'IDENTIFICADO') Identificado
-                    option(value="NO_IDENTIFICADO" selected=data.identificacion_estado === 'NO_IDENTIFICADO') No identificado
+                p(class="text-xs font-semibold uppercase tracking-widest text-primary-dark") Registro seleccionado
+                p(class="mt-1 text-sm text-slate-600") Editando la visita número #{data.id}
 
-            div
-                label(for="motivo_ingreso") Motivo de ingreso:
-                input#motivo_ingreso(type="text" name="motivo_ingreso" maxlength="255" value=data.motivo_ingreso || '')
+            span(class="rounded-full border border-primary/20 bg-white px-3 py-1 text-xs font-semibold text-primary-dark")
+                | Edición
 
-        fieldset
-            legend Datos personales
+        form(method="POST", action=`/entries/${data.id}/editar`, class="space-y-6")
 
-            div
-                label(for="nombres_visita") Nombres:
-                input#nombres_visita(type="text" name="nombres_visita" maxlength="100" value=data.nombres_visita || '')
+            //- Datos del ingreso
+            section(class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm")
+                div(class="flex items-center gap-4 border-b border-slate-100 px-5 py-5 sm:px-7")
+                    div(class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-light font-bold text-primary")
+                        | 01
 
-            div
-                label(for="apellidos_visita") Apellidos:
-                input#apellidos_visita(type="text" name="apellidos_visita" maxlength="100" value=data.apellidos_visita || '')
+                    div
+                        h3(class="font-bold text-slate-900") Datos del ingreso
+                        p(class="mt-1 text-sm text-slate-500") Tipo de acceso y motivo de la visita
 
-            div
-                label(for="document_type_id") Tipo de documento:
-                select#document_type_id(name="document_type_id")
-                    option(value="") Selecciona un documento
-                    option(value="1" selected=String(data.document_type_id || '') === '1') DNI
-                    option(value="2" selected=String(data.document_type_id || '') === '2') Carné de Extranjería
-                    option(value="3" selected=String(data.document_type_id || '') === '3') Pasaporte
-                    option(value="4" selected=String(data.document_type_id || '') === '4') Otro
+                div(class="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-7")
+                    div
+                        label(for="medio_ingreso", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Medio de ingreso
+                        select#medio_ingreso(
+                            name="medio_ingreso"
+                            required
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
+                            option(value="PEATON" selected=data.medio_ingreso === 'PEATON') Peatón
+                            option(value="VEHICULO" selected=data.medio_ingreso === 'VEHICULO') Vehículo
 
-            div
-                label(for="numero_documento") Número de documento:
-                input#numero_documento(type="text" name="numero_documento" maxlength="30" value=data.numero_documento || '')
+                    div
+                        label(for="identificacion_estado", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Estado de identificación
+                        select#identificacion_estado(
+                            name="identificacion_estado"
+                            required
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
+                            option(value="IDENTIFICADO" selected=data.identificacion_estado === 'IDENTIFICADO') Identificado
+                            option(value="NO_IDENTIFICADO" selected=data.identificacion_estado === 'NO_IDENTIFICADO') No identificado
 
-            div
-                label(for="direccion_visita") Dirección:
-                input#direccion_visita(type="text" name="direccion_visita" maxlength="200" value=data.direccion_visita || '')
+                    div(class="sm:col-span-2")
+                        label(for="motivo_ingreso", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Motivo de ingreso
+                        input#motivo_ingreso(
+                            type="text"
+                            name="motivo_ingreso"
+                            maxlength="255"
+                            value=data.motivo_ingreso || ''
+                            placeholder="Ej. Visita familiar, entrega de pedido..."
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
 
-        fieldset
-            legend Datos del vehículo
+            //- Datos personales
+            section(class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm")
+                div(class="flex items-center gap-4 border-b border-slate-100 px-5 py-5 sm:px-7")
+                    div(class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-light font-bold text-primary")
+                        | 02
 
-            div
-                label(for="placa_vehiculo") Placa:
-                input#placa_vehiculo(type="text" name="placa_vehiculo" maxlength="20" value=data.placa_vehiculo || '')
+                    div
+                        h3(class="font-bold text-slate-900") Datos personales
+                        p(class="mt-1 text-sm text-slate-500") Información de identificación del visitante
 
-            div
-                label(for="color_vehiculo") Color:
-                input#color_vehiculo(type="text" name="color_vehiculo" maxlength="50" value=data.color_vehiculo || '')
+                div(class="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-7")
+                    div
+                        label(for="nombres_visita", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Nombres
+                        input#nombres_visita(
+                            type="text"
+                            name="nombres_visita"
+                            maxlength="100"
+                            value=data.nombres_visita || ''
+                            placeholder="Nombres del visitante"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
 
-            div
-                label(for="cantidad_pasajeros") Cantidad de pasajeros:
-                input#cantidad_pasajeros(type="number" name="cantidad_pasajeros" min="0" step="1" value=(data.cantidad_pasajeros == null ? '' : data.cantidad_pasajeros))
+                    div
+                        label(for="apellidos_visita", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Apellidos
+                        input#apellidos_visita(
+                            type="text"
+                            name="apellidos_visita"
+                            maxlength="100"
+                            value=data.apellidos_visita || ''
+                            placeholder="Apellidos del visitante"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
 
-        div
-            button(type="submit") Guardar cambios
-            |  
-            a(href="/entries") Cancelar
+                    div
+                        label(for="document_type_id", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Tipo de documento
+                        select#document_type_id(
+                            name="document_type_id"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
+                            option(value="" selected=!data.document_type_id) Selecciona un documento
+                            option(value="1" selected=String(data.document_type_id || '') === '1') DNI
+                            option(value="2" selected=String(data.document_type_id || '') === '2') Carné de Extranjería
+                            option(value="3" selected=String(data.document_type_id || '') === '3') Pasaporte
+                            option(value="4" selected=String(data.document_type_id || '') === '4') Otro
+
+                    div
+                        label(for="numero_documento", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Número de documento
+                        input#numero_documento(
+                            type="text"
+                            name="numero_documento"
+                            maxlength="30"
+                            value=data.numero_documento || ''
+                            placeholder="Número de documento"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
+
+                    div(class="sm:col-span-2")
+                        label(for="direccion_visita", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Dirección
+                        input#direccion_visita(
+                            type="text"
+                            name="direccion_visita"
+                            maxlength="200"
+                            value=data.direccion_visita || ''
+                            placeholder="Dirección del visitante"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
+
+            //- Datos del vehículo
+            section(class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm")
+                div(class="flex items-center gap-4 border-b border-slate-100 px-5 py-5 sm:px-7")
+                    div(class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-light font-bold text-primary")
+                        | 03
+
+                    div
+                        h3(class="font-bold text-slate-900") Datos del vehículo
+                        p(class="mt-1 text-sm text-slate-500") Información del vehículo asociado al ingreso
+
+                div(class="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-7")
+                    div
+                        label(for="placa_vehiculo", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Placa
+                        input#placa_vehiculo(
+                            type="text"
+                            name="placa_vehiculo"
+                            maxlength="20"
+                            value=data.placa_vehiculo || ''
+                            placeholder="Ej. ABC-123"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 uppercase text-slate-900 outline-none transition placeholder:normal-case placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
+
+                    div
+                        label(for="color_vehiculo", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Color
+                        input#color_vehiculo(
+                            type="text"
+                            name="color_vehiculo"
+                            maxlength="50"
+                            value=data.color_vehiculo || ''
+                            placeholder="Ej. Negro, blanco..."
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
+
+                    div
+                        label(for="cantidad_pasajeros", class="mb-2 block text-sm font-semibold text-slate-700")
+                            | Cantidad de pasajeros
+                        input#cantidad_pasajeros(
+                            type="number"
+                            name="cantidad_pasajeros"
+                            min="0"
+                            step="1"
+                            value=(data.cantidad_pasajeros == null ? '' : data.cantidad_pasajeros)
+                            placeholder="0"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                        )
+
+            //- Acciones
+            div(class="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-end")
+                a(
+                    href="/entries"
+                    class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-600 transition hover:border-primary hover:text-primary"
+                ) Cancelar
+
+                button(
+                    type="submit"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-4 focus:ring-primary/20"
+                )
+                    span Guardar cambios
+                    span(class="text-lg") →

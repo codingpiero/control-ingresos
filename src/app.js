@@ -20,6 +20,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(session({
     store: new pgSession({
         pool:pool,
+        schemaName:'lobos',
         tableName:'session',
         createTableIfMissing:true
     }),
@@ -35,10 +36,18 @@ app.use(session({
 }))
 
 app.use((req, res, next) => {
-    res.locals.currentUser = req.session.user || null;
+    const user = req.session.user || null;
+
+    res.locals.currentUser = user;
+    res.locals.currentPath = req.path;
+
+    // Obtener el rol del usuario autenticado
+    res.locals.userRole = user
+        ? String(user.rol || user.role || '').toLowerCase()
+        : '';
+
     next();
 });
-
 // ROUTES
 const homeRoutes = require('./routes/home.routes');
 const entryRoutes = require('./routes/entry.routes');

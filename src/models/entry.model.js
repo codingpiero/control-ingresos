@@ -4,9 +4,9 @@ const pool = require('../configurations/database');
 async function findAll(){
      const result = await pool.query(`
         SELECT
-            e.id,
-            e.fecha_hora_ingreso,
-            e.fecha_hora_salida,
+            LPAD(e.id::text,5,'0') as id,
+   			TO_CHAR(e.fecha_hora_ingreso,'DD/MM/YYYY HH24:MI:SS') as fecha_hora_ingreso,
+            TO_CHAR(e.fecha_hora_salida,'DD/MM/YYYY HH24:MI:SS') as fecha_hora_salida,
             e.medio_ingreso,
             e.nombres_visita,
             e.apellidos_visita,
