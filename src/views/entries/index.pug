@@ -3,7 +3,7 @@ extends ../layout
 
 block content
     //- Encabezado
-    .mb-8.flex.flex-col.justify-between.gap-4(class="sm:flex-row sm:items-center")
+    div(class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center")
         div
             h2(class="text-2xl font-bold tracking-tight text-slate-900")
                 | Registro de visitas
@@ -17,24 +17,109 @@ block content
             span(class="text-xl") +
             | Registrar ingreso
 
-    //- Contenedor principal
-    .overflow-hidden.rounded-2xl.border.border-slate-200.bg-white.shadow-sm
+    //- Buscador y filtros
+    div(class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm")
+        div(class="mb-5")
+            h3(class="text-base font-bold text-slate-900")
+                | Buscar visitas
+            p(class="mt-1 text-sm text-slate-500")
+                | Filtra por datos del visitante o por las fechas de ingreso y salida.
 
-        //- Cabecera de tabla
-        .flex.flex-wrap.items-center.justify-between.gap-3.border-b.border-slate-200.p-5
-            div
-                h3(class="text-base font-bold text-slate-900")
-                    | Historial de ingresos
-                p(class="mt-1 text-sm text-slate-500")
-                    | Registros de visitas al condominio.
+        form(action="/entries" method="GET")
+            //- Buscador general
+            div(class="mb-5")
+                label(
+                    for="q"
+                    class="mb-2 block text-sm font-medium text-slate-700"
+                ) Buscar por código, visitante, documento, placa o motivo
 
-            span(class="rounded-full bg-primary-light px-3 py-1 text-xs font-semibold text-primary-dark")
-                = `${entries.length} registros`
+                input(
+                    id="q"
+                    type="search"
+                    name="q"
+                    value=pagination.search
+                    placeholder="Escribe lo que deseas buscar..."
+                    class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-light"
+                )
 
-        //- Tabla
-        .overflow-x-auto
+            //- Filtros por fecha
+            div(class="grid grid-cols-1 gap-5 md:grid-cols-2")
+                div
+                    label(
+                        for="fechaIngreso"
+                        class="mb-2 block text-sm font-medium text-slate-700"
+                    ) Fecha de ingreso
+
+                    input(
+                        id="fechaIngreso"
+                        type="date"
+                        name="fechaIngreso"
+                        value=pagination.fechaIngreso
+                        class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-light"
+                    )
+
+                div
+                    label(
+                        for="fechaSalida"
+                        class="mb-2 block text-sm font-medium text-slate-700"
+                    ) Fecha de salida
+
+                    input(
+                        id="fechaSalida"
+                        type="date"
+                        name="fechaSalida"
+                        value=pagination.fechaSalida
+                        class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-light"
+                    )
+
+            //- Cantidad de registros y botones
+            div(class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between")
+                div
+                    label(
+                        for="limit"
+                        class="mb-2 block text-sm font-medium text-slate-700"
+                    ) Registros por página
+
+                    select(
+                        id="limit"
+                        name="limit"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary-light sm:w-44"
+                    )
+                        option(value="10" selected=pagination.limit === 10) 10 registros
+                        option(value="20" selected=pagination.limit === 20) 20 registros
+                        option(value="50" selected=pagination.limit === 50) 50 registros
+
+                input(type="hidden" name="page" value="1")
+
+                div(class="flex flex-wrap gap-3")
+                    button(
+                        type="submit"
+                        class="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark active:scale-95"
+                    )
+                        | Buscar
+
+                    a(
+                        href="/entries"
+                        class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    )
+                        | Limpiar filtros
+
+    //- Resumen del historial
+    div(class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between")
+        div
+            h3(class="text-base font-bold text-slate-900")
+                | Historial de ingresos
+            p(class="mt-1 text-sm text-slate-500")
+                | Registros encontrados: #{pagination.total}
+
+        if pagination.total > 0
+            p(class="text-sm text-slate-500")
+                | Página #{pagination.page} de #{pagination.totalPages}
+
+    //- Tabla de registros
+    div(class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm")
+        div(class="overflow-x-auto")
             table(class="w-full min-w-[1250px] text-left text-sm")
-
                 thead(class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500")
                     tr
                         th(class="px-5 py-4 font-semibold") Código
@@ -45,16 +130,15 @@ block content
                         th(class="px-5 py-4 font-semibold") Medio ingreso
                         th(class="px-5 py-4 font-semibold") Placa
                         th(class="px-5 py-4 font-semibold") Identificación
+                        th(class="px-5 py-4 font-semibold") Motivo ingreso
                         th(class="px-5 py-4 font-semibold") Estado
                         th(class="px-5 py-4 font-semibold") Registrado por
                         th(class="px-5 py-4 font-semibold") Acciones
 
                 tbody(class="divide-y divide-slate-100")
-
                     if entries.length
                         each entry in entries
                             tr(class="transition hover:bg-violet-50/50")
-
                                 //- Código
                                 td(class="whitespace-nowrap px-5 py-4 font-semibold text-slate-700")
                                     = entry.id
@@ -65,21 +149,28 @@ block content
 
                                 //- Fecha de salida
                                 td(class="whitespace-nowrap px-5 py-4 text-slate-600")
-                                    = entry.fecha_hora_salida || 'Pendiente'
+                                    if entry.fecha_hora_salida
+                                        = entry.fecha_hora_salida
+                                    else
+                                        span(class="text-amber-600")
+                                            | Pendiente
 
                                 //- Visitante
                                 td(class="px-5 py-4")
                                     p(class="font-semibold text-slate-800")
-                                        = `${entry.nombres_visita || 'No identificado'} ${entry.apellidos_visita || ''}`
+                                        = `${entry.nombres_visita || '-'} ${entry.apellidos_visita || ''}`.trim()
 
                                 //- Documento
                                 td(class="whitespace-nowrap px-5 py-4 text-slate-600")
+                                    if entry.tipo_documento
+                                        span(class="mr-1 font-medium")
+                                            = entry.tipo_documento
                                     = entry.numero_documento || '-'
 
                                 //- Medio de ingreso
                                 td(class="whitespace-nowrap px-5 py-4")
                                     span(class="inline-flex rounded-lg bg-primary-light px-3 py-1 text-xs font-semibold capitalize text-primary-dark")
-                                        = entry.medio_ingreso
+                                        = entry.medio_ingreso || '-'
 
                                 //- Placa
                                 td(class="whitespace-nowrap px-5 py-4 font-medium text-slate-700")
@@ -87,11 +178,15 @@ block content
 
                                 //- Identificación
                                 td(class="whitespace-nowrap px-5 py-4 text-slate-600")
-                                    = entry.identificacion_estado
+                                    = entry.identificacion_estado || '-'
 
-                                //- Estado
+                                //- Motivo
+                                td(class="max-w-xs px-5 py-4 text-slate-600")
+                                    = entry.motivo_ingreso || '-'
+
+                                //- Estado de la visita
                                 td(class="whitespace-nowrap px-5 py-4")
-                                    if entry.fecha_hora_salida == null
+                                    if !entry.fecha_hora_salida
                                         span(class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700")
                                             span(class="h-2 w-2 rounded-full bg-emerald-500")
                                             | Dentro
@@ -102,26 +197,24 @@ block content
 
                                 //- Usuario que registró
                                 td(class="whitespace-nowrap px-5 py-4 text-slate-600")
-                                    = entry.username || '-'
+                                    = entry.registrado_por || '-'
 
                                 //- Acciones
                                 td(class="px-5 py-4")
-                                    .flex.items-center.gap-2
-
+                                    div(class="flex items-center gap-2")
                                         if currentUser.rol === 'VIGILANTE'
-
-                                            //- Botón editar
+                                            //- Editar
                                             a(
-                                                href=`/entries/${entry.id}/editar`
+                                                href=`/entries/${entry.entry_id || entry.id}/editar`
                                                 class="inline-flex items-center justify-center rounded-lg bg-violet-100 px-3 py-2 text-xs font-bold text-violet-800 shadow-sm transition hover:bg-violet-200 active:scale-95"
                                             )
                                                 | Editar
 
-                                            //- Botón registrar salida
-                                            if entry.fecha_hora_salida == null
+                                            //- Registrar salida
+                                            if !entry.fecha_hora_salida
                                                 form(
                                                     method="POST"
-                                                    action=`/entries/${entry.id}/salida`
+                                                    action=`/entries/${entry.entry_id || entry.id}/salida`
                                                     onsubmit="return confirm('¿Confirmas la salida de esta visita?')"
                                                 )
                                                     button(
@@ -130,10 +223,10 @@ block content
                                                     )
                                                         | Registrar salida
 
-                                            //- Botón eliminar
+                                            //- Eliminar
                                             form(
                                                 method="POST"
-                                                action=`/entries/${entry.id}/eliminar`
+                                                action=`/entries/${entry.entry_id || entry.id}/eliminar`
                                                 onsubmit="return confirm('¿Estás seguro de eliminar esta visita?')"
                                             )
                                                 button(
@@ -141,16 +234,14 @@ block content
                                                     class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 active:scale-95"
                                                 )
                                                     | Eliminar
-
                                         else
                                             span(class="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-500")
                                                 | Solo consulta
 
                     else
-                        //- Estado sin registros
                         tr
                             td(
-                                colspan="11"
+                                colspan="12"
                                 class="px-5 py-16 text-center"
                             )
                                 div(class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary-dark")
@@ -162,12 +253,47 @@ block content
                                         fill="none"
                                         stroke="currentColor"
                                         stroke-width="1.7"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
                                     )
-                                        path(d="M8 6h13M8 12h13M8 18h13")
-                                        path(d="M3 6h.01M3 12h.01M3 18h.01")
+                                        circle(cx="11" cy="11" r="8")
+                                        path(d="m21 21-4.35-4.35")
 
                                 h3(class="mt-4 text-base font-semibold text-slate-800")
-                                    | No hay registros todavía
+                                    | No se encontraron registros
 
                                 p(class="mt-2 text-sm text-slate-500")
-                                    | Los ingresos registrados aparecerán aquí.
+                                    | Modifica los criterios de búsqueda o limpia los filtros.
+
+    //- Paginación
+    if pagination.totalPages > 1
+        div(class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between")
+            p(class="text-sm text-slate-500")
+                | Mostrando página #{pagination.page} de #{pagination.totalPages}
+
+            div(class="flex flex-wrap items-center gap-2")
+                //- Página anterior
+                if pagination.page > 1
+                    a(
+                        href=`/entries?q=${encodeURIComponent(pagination.search || '')}&fechaIngreso=${encodeURIComponent(pagination.fechaIngreso || '')}&fechaSalida=${encodeURIComponent(pagination.fechaSalida || '')}&limit=${pagination.limit}&page=${pagination.page - 1}`
+                        class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    )
+                        | Anterior
+                else
+                    span(class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-400")
+                        | Anterior
+
+                //- Página actual
+                span(class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white")
+                    = pagination.page
+
+                //- Página siguiente
+                if pagination.page < pagination.totalPages
+                    a(
+                        href=`/entries?q=${encodeURIComponent(pagination.search || '')}&fechaIngreso=${encodeURIComponent(pagination.fechaIngreso || '')}&fechaSalida=${encodeURIComponent(pagination.fechaSalida || '')}&limit=${pagination.limit}&page=${pagination.page + 1}`
+                        class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    )
+                        | Siguiente
+                else
+                    span(class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-400")
+                        | Siguiente

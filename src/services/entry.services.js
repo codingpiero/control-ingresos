@@ -2,11 +2,45 @@
 const AppError = require('../errors/AppError');
 const entryModel = require('../models/entry.model');
 
-async function getEntries() {
-    const entries = await entryModel.findAll();
-    return entries;
-}
+async function getEntries({
+    search = '',
+    fechaIngreso = '',
+    fechaSalida = '',
+    page = 1,
+    limit = 10
+} = {}) {
+    const currentPage = Math.max(
+        1,
+        Number.parseInt(page, 10) || 1
+    );
 
+    const pageSize = [10, 20, 50].includes(Number(limit))
+        ? Number(limit)
+        : 10;
+
+    const offset = (currentPage - 1) * pageSize;
+
+    const { entries, total } = await entryModel.findAll({
+        search,
+        fechaIngreso,
+        fechaSalida,
+        limit: pageSize,
+        offset
+    });
+
+    return {
+        entries,
+        pagination: {
+            search,
+            fechaIngreso,
+            fechaSalida,
+            page: currentPage,
+            limit: pageSize,
+            total,
+            totalPages: Math.ceil(total / pageSize)
+        }
+    };
+}
 async function getEntryById(id) {
     const entryId = Number(id);
     if (!Number.isInteger(entryId) || entryId <= 0) {

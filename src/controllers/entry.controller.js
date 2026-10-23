@@ -1,13 +1,29 @@
 const entryService = require('../services/entry.services');
 
-async function index(req,res,next){
+async function index(req, res, next) {
     try {
-        const entries = await entryService.getEntries();
-        res.render('entries/index',{
-            title:'Listado de visitas',
-            entries
-        });
+        const {
+            q = '',
+            fechaIngreso = '',
+            fechaSalida = '',
+            page = 1,
+            limit = 10
+        } = req.query;
 
+        const { entries, pagination } =
+            await entryService.getEntries({
+                search: q,
+                fechaIngreso,
+                fechaSalida,
+                page,
+                limit
+            });
+
+        res.render('entries/index', {
+            title: 'Listado de visitas',
+            entries,
+            pagination
+        });
     } catch (e) {
         next(e);
     }

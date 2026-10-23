@@ -1,33 +1,97 @@
 const pool = require('../configurations/database');
 
 
-async function findAll(){
-     const result = await pool.query(`
-        SELECT
-            LPAD(e.id::text,5,'0') as id,
-   			TO_CHAR(e.fecha_hora_ingreso,'DD/MM/YYYY HH24:MI:SS') as fecha_hora_ingreso,
-            TO_CHAR(e.fecha_hora_salida,'DD/MM/YYYY HH24:MI:SS') as fecha_hora_salida,
-            e.medio_ingreso,
-            e.nombres_visita,
-            e.apellidos_visita,
-            dt.codigo AS tipo_documento,
-            e.numero_documento,
-            e.placa_vehiculo,
-            e.identificacion_estado,
-            u.username AS registrado_por
 
+async function findAll({
+    search = '',
+    fechaIngreso = '',
+    fechaSalida = '',
+    limit = 10,
+    offset = 0
+} = {}) {
+    const searchTerm = search.trim();
+
+    const where = `
+        WHERE
+            (
+                $1 = ''
+                OR LPAD(e.id::text, 5, '0') ILIKE '%' || $1 || '%'
+                OR e.id::text ILIKE '%' || $1 || '%'
+                OR e.nombres_visita ILIKE '%' || $1 || '%'
+                OR e.apellidos_visita ILIKE '%' || $1 || '%'
+                OR e.numero_documento ILIKE '%' || $1 || '%'
+                OR e.placa_vehiculo ILIKE '%' || $1 || '%'
+                OR e.motivo_ingreso ILIKE '%' || $1 || '%'
+                OR e.medio_ingreso ILIKE '%' || $1 || '%'
+                OR dt.codigo ILIKE '%' || $1 || '%'
+                OR e.identificacion_estado ILIKE '%' || $1 || '%'
+                OR u.username ILIKE '%' || $1 || '%'
+            )
+            AND (
+                NULLIF($2, '') IS NULL
+                OR (
+                    e.fecha_hora_ingreso >= NULLIF($2, '')::date
+                    AND e.fecha_hora_ingreso < NULLIF($2, '')::date + INTERVAL '1 day'
+                )
+            )
+            AND (
+                NULLIF($3, '') IS NULL
+                OR (
+                    e.fecha_hora_salida >= NULLIF($3, '')::date
+                    AND e.fecha_hora_salida < NULLIF($3, '')::date + INTERVAL '1 day'
+                )
+            )
+    `;
+
+    const values = [searchTerm, fechaIngreso, fechaSalida];
+
+    const from = `
         FROM lobos.entries e
-
         LEFT JOIN lobos.document_types dt
             ON dt.id = e.document_type_id
-
         INNER JOIN lobos.users u
             ON u.id = e.created_by
+    `;
 
+    const result = await pool.query(
+        `
+        SELECT
+            e.id AS entry_id,
+            LPAD(e.id::text, 5, '0') AS id,
+            TO_CHAR(e.fecha_hora_ingreso, 'DD/MM/YYYY HH24:MI:SS')
+                AS fecha_hora_ingreso,
+            TO_CHAR(e.fecha_hora_salida, 'DD/MM/YYYY HH24:MI:SS')
+                AS fecha_hora_salida,
+            e.medio_ingreso,
+            INITCAP(e.nombres_visita) AS nombres_visita,
+            INITCAP(e.apellidos_visita) AS apellidos_visita,
+            dt.codigo AS tipo_documento,
+            e.numero_documento,
+            UPPER(e.placa_vehiculo) AS placa_vehiculo,
+            INITCAP(e.motivo_ingreso) AS motivo_ingreso,
+            e.identificacion_estado,
+            INITCAP(u.username) AS registrado_por
+        ${from}
+        ${where}
         ORDER BY e.fecha_hora_ingreso DESC
-    `);
+        LIMIT $4 OFFSET $5
+        `,
+        [...values, limit, offset]
+    );
 
-    return result.rows;
+    const countResult = await pool.query(
+        `
+        SELECT COUNT(*)::int AS total
+        ${from}
+        ${where}
+        `,
+        values
+    );
+
+    return {
+        entries: result.rows,
+        total: countResult.rows[0].total
+    };
 }
 
 async function create(data) {
