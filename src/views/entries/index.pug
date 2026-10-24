@@ -1,4 +1,3 @@
-
 extends ../layout
 
 block content
@@ -26,7 +25,6 @@ block content
                 | Filtra por datos del visitante o por las fechas de ingreso y salida.
 
         form(action="/entries" method="GET")
-            //- Buscador general
             div(class="mb-5")
                 label(
                     for="q"
@@ -42,7 +40,6 @@ block content
                     class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-light"
                 )
 
-            //- Filtros por fecha
             div(class="grid grid-cols-1 gap-5 md:grid-cols-2")
                 div
                     label(
@@ -72,7 +69,6 @@ block content
                         class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-light"
                     )
 
-            //- Cantidad de registros y botones
             div(class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between")
                 div
                     label(
@@ -139,15 +135,12 @@ block content
                     if entries.length
                         each entry in entries
                             tr(class="transition hover:bg-violet-50/50")
-                                //- Código
                                 td(class="whitespace-nowrap px-5 py-4 font-semibold text-slate-700")
                                     = entry.id
 
-                                //- Fecha de ingreso
                                 td(class="whitespace-nowrap px-5 py-4 text-slate-600")
                                     = entry.fecha_hora_ingreso
 
-                                //- Fecha de salida
                                 td(class="whitespace-nowrap px-5 py-4 text-slate-600")
                                     if entry.fecha_hora_salida
                                         = entry.fecha_hora_salida
@@ -155,36 +148,29 @@ block content
                                         span(class="text-amber-600")
                                             | Pendiente
 
-                                //- Visitante
                                 td(class="px-5 py-4")
                                     p(class="font-semibold text-slate-800")
                                         = `${entry.nombres_visita || '-'} ${entry.apellidos_visita || ''}`.trim()
 
-                                //- Documento
                                 td(class="whitespace-nowrap px-5 py-4 text-slate-600")
                                     if entry.tipo_documento
                                         span(class="mr-1 font-medium")
                                             = entry.tipo_documento
                                     = entry.numero_documento || '-'
 
-                                //- Medio de ingreso
                                 td(class="whitespace-nowrap px-5 py-4")
                                     span(class="inline-flex rounded-lg bg-primary-light px-3 py-1 text-xs font-semibold capitalize text-primary-dark")
                                         = entry.medio_ingreso || '-'
 
-                                //- Placa
                                 td(class="whitespace-nowrap px-5 py-4 font-medium text-slate-700")
                                     = entry.placa_vehiculo || '-'
 
-                                //- Identificación
                                 td(class="whitespace-nowrap px-5 py-4 text-slate-600")
                                     = entry.identificacion_estado || '-'
 
-                                //- Motivo
                                 td(class="max-w-xs px-5 py-4 text-slate-600")
                                     = entry.motivo_ingreso || '-'
 
-                                //- Estado de la visita
                                 td(class="whitespace-nowrap px-5 py-4")
                                     if !entry.fecha_hora_salida
                                         span(class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700")
@@ -195,22 +181,26 @@ block content
                                             span(class="h-2 w-2 rounded-full bg-slate-400")
                                             | Salida registrada
 
-                                //- Usuario que registró
                                 td(class="whitespace-nowrap px-5 py-4 text-slate-600")
                                     = entry.registrado_por || '-'
 
-                                //- Acciones
                                 td(class="px-5 py-4")
-                                    div(class="flex items-center gap-2")
+                                    div(class="flex flex-wrap items-center gap-2")
                                         if currentUser.rol === 'VIGILANTE'
-                                            //- Editar
+                                            //- Nuevo ingreso basado en esta visita
+                                            button(
+                                                type="button"
+                                                data-entry-id=entry.entry_id || entry.id
+                                                class="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-indigo-100 px-3 py-2 text-xs font-bold text-indigo-800 shadow-sm transition hover:bg-indigo-200 active:scale-95 js-nuevo-ingreso"
+                                            )
+                                                | Nuevo ingreso
+
                                             a(
                                                 href=`/entries/${entry.entry_id || entry.id}/editar`
                                                 class="inline-flex items-center justify-center rounded-lg bg-violet-100 px-3 py-2 text-xs font-bold text-violet-800 shadow-sm transition hover:bg-violet-200 active:scale-95"
                                             )
                                                 | Editar
 
-                                            //- Registrar salida
                                             if !entry.fecha_hora_salida
                                                 form(
                                                     method="POST"
@@ -223,7 +213,6 @@ block content
                                                     )
                                                         | Registrar salida
 
-                                            //- Eliminar
                                             form(
                                                 method="POST"
                                                 action=`/entries/${entry.entry_id || entry.id}/eliminar`
@@ -272,7 +261,6 @@ block content
                 | Mostrando página #{pagination.page} de #{pagination.totalPages}
 
             div(class="flex flex-wrap items-center gap-2")
-                //- Página anterior
                 if pagination.page > 1
                     a(
                         href=`/entries?q=${encodeURIComponent(pagination.search || '')}&fechaIngreso=${encodeURIComponent(pagination.fechaIngreso || '')}&fechaSalida=${encodeURIComponent(pagination.fechaSalida || '')}&limit=${pagination.limit}&page=${pagination.page - 1}`
@@ -283,11 +271,9 @@ block content
                     span(class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-400")
                         | Anterior
 
-                //- Página actual
                 span(class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white")
                     = pagination.page
 
-                //- Página siguiente
                 if pagination.page < pagination.totalPages
                     a(
                         href=`/entries?q=${encodeURIComponent(pagination.search || '')}&fechaIngreso=${encodeURIComponent(pagination.fechaIngreso || '')}&fechaSalida=${encodeURIComponent(pagination.fechaSalida || '')}&limit=${pagination.limit}&page=${pagination.page + 1}`
@@ -297,3 +283,295 @@ block content
                 else
                     span(class="inline-flex cursor-not-allowed items-center justify-center rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-400")
                         | Siguiente
+
+    //- Modal de nuevo ingreso
+    div#modalNuevoIngreso(
+        class="fixed inset-0 z-50 hidden items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="tituloModalNuevoIngreso"
+    )
+        div(class="my-auto max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl")
+            div(class="flex items-center justify-between border-b border-slate-200 px-6 py-5")
+                div
+                    h2#tituloModalNuevoIngreso(class="text-xl font-bold text-slate-900")
+                        | Registrar nuevo ingreso
+                    p(class="mt-1 text-sm text-slate-500")
+                        | Revisa los datos y actualiza los del nuevo ingreso.
+
+                button(
+                    type="button"
+                    class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                    data-cerrar-modal
+                    aria-label="Cerrar modal"
+                )
+                    | ✕
+
+            form#formNuevoIngreso(class="space-y-5 p-6")
+                p#nuevoIngresoEstado(
+                    class="hidden rounded-xl border p-3 text-sm"
+                    role="status"
+                    aria-live="polite"
+                )
+
+                div(class="grid grid-cols-1 gap-4 sm:grid-cols-2")
+                    div
+                        label(for="nuevoNombres" class="mb-1 block text-sm font-medium text-slate-700")
+                            | Nombres
+                        input#nuevoNombres(
+                            type="text"
+                            readonly
+                            class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600"
+                        )
+
+                    div
+                        label(for="nuevoApellidos" class="mb-1 block text-sm font-medium text-slate-700")
+                            | Apellidos
+                        input#nuevoApellidos(
+                            type="text"
+                            readonly
+                            class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600"
+                        )
+
+                    div
+                        label(for="nuevoDocumento" class="mb-1 block text-sm font-medium text-slate-700")
+                            | Documento
+                        input#nuevoDocumento(
+                            type="text"
+                            readonly
+                            class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600"
+                        )
+
+                    div
+                        label(for="nuevoMedio" class="mb-1 block text-sm font-medium text-slate-700")
+                            | Medio de ingreso
+                        input#nuevoMedio(
+                            type="text"
+                            readonly
+                            class="w-full rounded-xl border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm text-slate-600"
+                        )
+
+                    div#grupoNuevaPlaca
+                        label(for="nuevoPlaca" class="mb-1 block text-sm font-medium text-slate-700")
+                            | Placa
+                        input#nuevoPlaca(
+                            name="placa_vehiculo"
+                            type="text"
+                            maxlength="15"
+                            class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm uppercase outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
+                        )
+
+                    div#grupoNuevoColor
+                        label(for="nuevoColor" class="mb-1 block text-sm font-medium text-slate-700")
+                            | Color del vehículo
+                        input#nuevoColor(
+                            name="color_vehiculo"
+                            type="text"
+                            maxlength="50"
+                            class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
+                        )
+
+                    div#grupoNuevosPasajeros
+                        label(for="nuevosPasajeros" class="mb-1 block text-sm font-medium text-slate-700")
+                            | Cantidad de pasajeros
+                        input#nuevosPasajeros(
+                            name="cantidad_pasajeros"
+                            type="number"
+                            min="0"
+                            step="1"
+                            class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
+                        )
+
+                    div(class="sm:col-span-2")
+                        label(for="nuevoMotivo" class="mb-1 block text-sm font-medium text-slate-700")
+                            | Motivo del ingreso
+                        textarea#nuevoMotivo(
+                            name="motivo_ingreso"
+                            rows="3"
+                            maxlength="1000"
+                            class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-light"
+                        )
+
+                div(class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end")
+                    button(
+                        type="button"
+                        data-cerrar-modal
+                        class="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    )
+                        | Cancelar
+
+                    button#btnGuardarNuevoIngreso(
+                        type="submit"
+                        class="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
+                    )
+                        | Registrar ingreso
+
+    script.
+        (() => {
+            const modal = document.getElementById('modalNuevoIngreso');
+            const form = document.getElementById('formNuevoIngreso');
+            const estado = document.getElementById('nuevoIngresoEstado');
+            const botonGuardar = document.getElementById('btnGuardarNuevoIngreso');
+
+            let registroId = null;
+            let cargando = false;
+            let enviando = false;
+
+            function mostrarEstado(mensaje, tipo = 'info') {
+                const estilos = {
+                    info: 'border-blue-200 bg-blue-50 text-blue-800',
+                    error: 'border-red-200 bg-red-50 text-red-800',
+                    success: 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                };
+
+                estado.className = `rounded-xl border p-3 text-sm ${estilos[tipo]}`;
+                estado.textContent = mensaje;
+            }
+
+            function limpiarEstado() {
+                estado.textContent = '';
+                estado.className = 'hidden rounded-xl border p-3 text-sm';
+            }
+
+            function cerrarModal() {
+                if (cargando || enviando) return;
+
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                registroId = null;
+            }
+
+            function campo(id) {
+                return document.getElementById(id);
+            }
+
+            async function abrirModal(id) {
+                if (cargando || enviando) return;
+
+                registroId = id;
+                cargando = true;
+                form.reset();
+                limpiarEstado();
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                botonGuardar.disabled = true;
+                mostrarEstado('Cargando los datos de la visita anterior...');
+
+                try {
+                    const respuesta = await fetch(
+                        `/entries/${encodeURIComponent(id)}/nuevo-ingreso`,
+                        {
+                            headers: { Accept: 'application/json' }
+                        }
+                    );
+
+                    const resultado = await respuesta.json();
+
+                    if (!respuesta.ok || !resultado.success) {
+                        throw new Error(resultado.message || 'No se pudieron cargar los datos.');
+                    }
+
+                    const data = resultado.data;
+
+                    campo('nuevoNombres').value = data.nombres_visita || '';
+                    campo('nuevoApellidos').value = data.apellidos_visita || '';
+                    campo('nuevoDocumento').value = data.numero_documento || '';
+                    campo('nuevoMedio').value = data.medio_ingreso || '';
+
+                    campo('nuevoPlaca').value = data.placa_vehiculo || '';
+                    campo('nuevoColor').value = data.color_vehiculo || '';
+                    campo('nuevosPasajeros').value = data.cantidad_pasajeros ?? '';
+                    campo('nuevoMotivo').value = data.motivo_ingreso || '';
+
+                    const esVehiculo = data.medio_ingreso === 'VEHICULO';
+
+                    campo('grupoNuevaPlaca').classList.toggle('hidden', !esVehiculo);
+                    campo('grupoNuevoColor').classList.toggle('hidden', !esVehiculo);
+                    campo('grupoNuevosPasajeros').classList.toggle('hidden', !esVehiculo);
+
+                    mostrarEstado(
+                        'Verifica la placa y el motivo antes de registrar el nuevo ingreso.',
+                        'info'
+                    );
+
+                    botonGuardar.disabled = false;
+                    campo(esVehiculo ? 'nuevoPlaca' : 'nuevoMotivo').focus();
+                } catch (error) {
+                    mostrarEstado(error.message || 'Error al cargar los datos.', 'error');
+                } finally {
+                    cargando = false;
+                }
+            }
+
+            document.querySelectorAll('.js-nuevo-ingreso').forEach((boton) => {
+                boton.addEventListener('click', () => {
+                    abrirModal(boton.dataset.entryId);
+                });
+            });
+
+            modal.querySelectorAll('[data-cerrar-modal]').forEach((boton) => {
+                boton.addEventListener('click', cerrarModal);
+            });
+
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) cerrarModal();
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (
+                    event.key === 'Escape' &&
+                    !modal.classList.contains('hidden')
+                ) {
+                    cerrarModal();
+                }
+            });
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                if (!registroId || cargando || enviando) return;
+
+                enviando = true;
+                botonGuardar.disabled = true;
+                botonGuardar.textContent = 'Registrando...';
+
+                try {
+                    const payload = {
+                        placa_vehiculo: campo('nuevoPlaca').value,
+                        color_vehiculo: campo('nuevoColor').value,
+                        cantidad_pasajeros: campo('nuevosPasajeros').value,
+                        motivo_ingreso: campo('nuevoMotivo').value
+                    };
+
+                    const respuesta = await fetch(
+                        `/entries/${encodeURIComponent(registroId)}/nuevo-ingreso`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Accept: 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+                    const resultado = await respuesta.json();
+
+                    if (!respuesta.ok || !resultado.success) {
+                        throw new Error(resultado.message || 'No se pudo registrar el ingreso.');
+                    }
+
+                    window.location.reload();
+                } catch (error) {
+                    mostrarEstado(
+                        error.message || 'Ocurrió un error al registrar el ingreso.',
+                        'error'
+                    );
+                } finally {
+                    enviando = false;
+                    botonGuardar.disabled = false;
+                    botonGuardar.textContent = 'Registrar ingreso';
+                }
+            });
+        })();

@@ -51,7 +51,7 @@ async function getEntryById(id) {
 
 async function createEntry(data) {
 
-    data.nombre_visita = data.nombre_visita?.trim() || null;
+    data.nombres_visita = data.nombres_visita?.trim() || null;
     data.apellidos_visita = data.apellidos_visita?.trim() || null;
     data.numero_documento = data.numero_documento?.trim() || null;
     data.direccion_visita = data.direccion_visita?.trim() || null;
@@ -189,6 +189,30 @@ async function registerExit(id){
     }
     return updatedEntry;
 }
+
+async function getDataForNewEntry(id) {
+    const entry = await getEntryById(id);
+
+    if (!entry) {
+        throw new AppError('La visita no existe.', 404);
+    }
+
+    // Reutilizamos los datos de la persona y del ingreso anterior.
+    // No copiamos ID, fecha de ingreso ni fecha de salida.
+    return {
+        medio_ingreso: entry.medio_ingreso,
+        nombres_visita: entry.nombres_visita,
+        apellidos_visita: entry.apellidos_visita,
+        document_type_id: entry.document_type_id,
+        numero_documento: entry.numero_documento,
+        direccion_visita: entry.direccion_visita,
+        identificacion_estado: entry.identificacion_estado,
+        placa_vehiculo: entry.placa_vehiculo,
+        color_vehiculo: entry.color_vehiculo,
+        cantidad_pasajeros: entry.cantidad_pasajeros,
+        motivo_ingreso: entry.motivo_ingreso
+    };
+}
 module.exports = {
     getEntries,
     createEntry,
@@ -196,4 +220,5 @@ module.exports = {
     getEntryById,
     deleteEntry,
     registerExit,
+    getDataForNewEntry
 }

@@ -84,7 +84,7 @@ block content
                             class="w-full capitalize rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
-            //- DATOS PERSONALES: PARA PEATÓN Y VEHÍCULO
+            //- DATOS PERSONALES
             fieldset#datos_personales(class="border-b border-gray-100 p-5 sm:p-7")
                 legend(class="sr-only") Datos personales
 
@@ -107,6 +107,7 @@ block content
                             maxlength="100"
                             value=(data.nombres_visita || '')
                             placeholder="Ingresa los nombres"
+                            autocomplete="given-name"
                             class="w-full capitalize rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
@@ -123,6 +124,7 @@ block content
                             maxlength="100"
                             value=(data.apellidos_visita || '')
                             placeholder="Ingresa los apellidos"
+                            autocomplete="family-name"
                             class="w-full capitalize rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
@@ -137,7 +139,7 @@ block content
                             name="document_type_id"
                             class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
-                            option(value="") Selecciona un documento
+                            option(value="" selected=(String(data.document_type_id || '') === '')) Selecciona un documento
                             option(value="1" selected=(String(data.document_type_id || '') === '1')) DNI
                             option(value="2" selected=(String(data.document_type_id || '') === '2')) Carné de Extranjería
                             option(value="3" selected=(String(data.document_type_id || '') === '3')) Pasaporte
@@ -156,8 +158,17 @@ block content
                             maxlength="30"
                             value=(data.numero_documento || '')
                             placeholder="Ingresa el número"
+                            autocomplete="off"
+                            inputmode="numeric"
                             class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
+
+                    //- ESTADO DE CONSULTA DNI
+                    div#dni_estado(
+                        class="hidden md:col-span-2 rounded-xl border p-3 text-sm"
+                        role="status"
+                        aria-live="polite"
+                    )
 
                     //- DIRECCIÓN
                     div(class="space-y-2 md:col-span-2")
@@ -172,10 +183,11 @@ block content
                             maxlength="200"
                             value=(data.direccion_visita || '')
                             placeholder="Ingresa la dirección"
-                            class="w-full uppercase rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
+                            autocomplete="street-address"
+                            class="w-full capitalize rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-primary focus:ring-4 focus:ring-violet-100"
                         )
 
-            //- DATOS DEL VEHÍCULO: SOLO SI SELECCIONA VEHÍCULO
+            //- DATOS DEL VEHÍCULO
             fieldset#datos_vehiculo(class="border-b border-gray-100 p-5 sm:p-7")
                 legend(class="sr-only") Datos del vehículo
 
@@ -247,27 +259,240 @@ block content
                     class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-4 focus:ring-violet-200"
                 ) Registrar visita
 
-    //- JAVASCRIPT PARA MOSTRAR U OCULTAR DATOS DEL VEHÍCULO
+    //- JAVASCRIPT
     script.
         document.addEventListener('DOMContentLoaded', () => {
+            // ==========================================
+            // ELEMENTOS DEL FORMULARIO
+            // ==========================================
             const medioIngreso = document.getElementById('medio_ingreso');
             const datosVehiculo = document.getElementById('datos_vehiculo');
 
-            if (!medioIngreso || !datosVehiculo) return;
+            const tipoDocumento = document.getElementById('document_type_id');
+            const numeroDocumento = document.getElementById('numero_documento');
+            const nombres = document.getElementById('nombres_visita');
+            const apellidos = document.getElementById('apellidos_visita');
+            const estadoDni = document.getElementById('dni_estado');
 
-            const camposVehiculo = datosVehiculo.querySelectorAll('input, select, textarea, button');
+            // ==========================================
+            // MOSTRAR U OCULTAR DATOS DEL VEHÍCULO
+            // ==========================================
+            if (medioIngreso && datosVehiculo) {
+                const camposVehiculo = datosVehiculo.querySelectorAll(
+                    'input, select, textarea, button'
+                );
 
-            function actualizarFormulario() {
-                const esVehiculo = medioIngreso.value === 'VEHICULO';
+                function actualizarFormulario() {
+                    const esVehiculo = medioIngreso.value === 'VEHICULO';
 
-                datosVehiculo.hidden = !esVehiculo;
+                    datosVehiculo.hidden = !esVehiculo;
 
-                camposVehiculo.forEach(campo => {
-                    campo.disabled = !esVehiculo;
-                });
+                    camposVehiculo.forEach(campo => {
+                        campo.disabled = !esVehiculo;
+                    });
+                }
+
+                medioIngreso.addEventListener('change', actualizarFormulario);
+
+                actualizarFormulario();
             }
 
-            medioIngreso.addEventListener('change', actualizarFormulario);
+            // ==========================================
+            // CONSULTA AUTOMÁTICA DEL DNI
+            // ==========================================
+            if (
+                !tipoDocumento ||
+                !numeroDocumento ||
+                !nombres ||
+                !apellidos ||
+                !estadoDni
+            ) {
+                return;
+            }
 
-            actualizarFormulario();
+            let temporizadorDni = null;
+            let controladorConsulta = null;
+            let numeroSolicitud = 0;
+
+            function mostrarEstado(mensaje, tipo) {
+                const estilos = {
+                    info: [
+                        'border-blue-200',
+                        'bg-blue-50',
+                        'text-blue-700'
+                    ],
+                    success: [
+                        'border-green-200',
+                        'bg-green-50',
+                        'text-green-700'
+                    ],
+                    warning: [
+                        'border-amber-200',
+                        'bg-amber-50',
+                        'text-amber-800'
+                    ],
+                    error: [
+                        'border-red-200',
+                        'bg-red-50',
+                        'text-red-700'
+                    ]
+                };
+
+                estadoDni.className = 'md:col-span-2 rounded-xl border p-3 text-sm';
+                estadoDni.classList.add(...estilos[tipo]);
+                estadoDni.textContent = mensaje;
+                estadoDni.classList.remove('hidden');
+            }
+
+            function ocultarEstado() {
+                estadoDni.classList.add('hidden');
+                estadoDni.textContent = '';
+            }
+
+            function cancelarConsultaAnterior() {
+                numeroSolicitud++;
+
+                if (temporizadorDni) {
+                    clearTimeout(temporizadorDni);
+                    temporizadorDni = null;
+                }
+
+                if (controladorConsulta) {
+                    controladorConsulta.abort();
+                    controladorConsulta = null;
+                }
+            }
+
+            function limpiarDatosPersona() {
+                nombres.value = '';
+                apellidos.value = '';
+            }
+
+            async function consultarDni(dni, solicitudActual) {
+                const controladorActual = new AbortController();
+                controladorConsulta = controladorActual;
+
+                mostrarEstado('Consultando DNI...', 'info');
+
+                try {
+                    const respuesta = await fetch('/entries/consultar-dni', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ dni }),
+                        signal: controladorActual.signal
+                    });
+
+                    const resultado = await respuesta.json();
+
+                    // Ignorar respuestas antiguas.
+                    if (
+                        solicitudActual !== numeroSolicitud ||
+                        tipoDocumento.value !== '1' ||
+                        numeroDocumento.value.trim() !== dni
+                    ) {
+                        return;
+                    }
+
+                    if (!respuesta.ok || !resultado.success || !resultado.data) {
+                        limpiarDatosPersona();
+
+                        mostrarEstado(
+                            resultado.message ||
+                            'No se encontraron datos. Puedes ingresarlos manualmente.',
+                            'warning'
+                        );
+
+                        return;
+                    }
+
+                    if (
+                        typeof resultado.data.nombres !== 'string' ||
+                        typeof resultado.data.apellidos !== 'string'
+                    ) {
+                        limpiarDatosPersona();
+
+                        mostrarEstado(
+                            'La respuesta no contiene datos válidos. Ingresa los datos manualmente.',
+                            'warning'
+                        );
+
+                        return;
+                    }
+
+                    nombres.value = resultado.data.nombres;
+                    apellidos.value = resultado.data.apellidos;
+
+                    mostrarEstado(
+                        'DNI encontrado. Nombres y apellidos completados automáticamente.',
+                        'success'
+                    );
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        return;
+                    }
+
+                    if (solicitudActual !== numeroSolicitud) {
+                        return;
+                    }
+
+                    limpiarDatosPersona();
+
+                    mostrarEstado(
+                        'No se pudo consultar el DNI. Puedes ingresar los datos manualmente.',
+                        'warning'
+                    );
+                } finally {
+                    if (controladorConsulta === controladorActual) {
+                        controladorConsulta = null;
+                    }
+                }
+            }
+
+            function programarConsultaDni() {
+                cancelarConsultaAnterior();
+                limpiarDatosPersona();
+
+                if (tipoDocumento.value !== '1') {
+                    ocultarEstado();
+                    return;
+                }
+
+                const dni = numeroDocumento.value.trim();
+
+                if (!dni) {
+                    ocultarEstado();
+                    return;
+                }
+
+                if (!/^\d{8}$/.test(dni)) {
+                    mostrarEstado(
+                        'Ingresa los 8 dígitos del DNI para consultar automáticamente.',
+                        'warning'
+                    );
+                    return;
+                }
+
+                const solicitudActual = numeroSolicitud;
+
+                // Esperar 400 ms después de escribir.
+                temporizadorDni = setTimeout(() => {
+                    consultarDni(dni, solicitudActual);
+                }, 400);
+            }
+
+            numeroDocumento.addEventListener('input', programarConsultaDni);
+
+            tipoDocumento.addEventListener('change', () => {
+                cancelarConsultaAnterior();
+                limpiarDatosPersona();
+
+                if (tipoDocumento.value === '1') {
+                    programarConsultaDni();
+                } else {
+                    ocultarEstado();
+                }
+            });
         });

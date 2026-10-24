@@ -15,6 +15,9 @@ const config = {
     },
     SESSION:{
         SECRET:process.env.SESSION_SECRET
+    },
+    API:{
+        DNI_TOKEN: process.env.APIPERU_TOKEN
     }
 }
 
